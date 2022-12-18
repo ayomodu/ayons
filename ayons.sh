@@ -5,6 +5,7 @@ PROG_VERSION="0.0.1"
 
 USAGE="
 Usage:
+
   $PROG create <namespace>
   $PROG switch <namespace>
   $PROG ls
@@ -27,12 +28,13 @@ For more details see also:
 "
 
 
-error_list="No Namespaces To List, Create A Namespace Using: $ 'ayons create {namespace}'"
+error_msg="No Namespaces To List"
 
-namespace=$(echo $1 | tr [:upper:] [:lower:])
+namespace=$(echo $2 | tr [:upper:] [:lower:])
 
 ns=( $(kubectl get ns | cut -d " " -f 1 | cut -d $'\n' -f 2-) )
 
+# kubeoff="Unable to connect to the server: dial tcp [::1]:8080: connectex: No connection could be made because the target machine actively refused it."
 
 usage(){
     echo -e "$USAGE"
@@ -45,12 +47,12 @@ display_version(){
 }
 
 list_namespaces(){
-    if [ -n $ns ]
+    if [ -z $ns ]
     then
-        echo $error_list | tr ":" "\n"
+        echo $error_msg 
         exit 1
     else
-        kubectl get ns
+        kubectl get ns | cut -d " " -f 1 | cut -d $'\n' -f 2-
     fi
 }
 
@@ -72,16 +74,17 @@ checkx(){
     done
 }
 
-VAR=$(checkx)
-
-
-    # if [ -z $VAR ]
-    # then
-    #     error
-    # else
-    #     kubectl get pods -n $namespace
-    # fi
-
+switchnamespace(){
+    local VAR
+    VAR=$(checkx)
+    swns="kubectl config set-context --current --namespace=$namespace"
+    if [ -z $VAR ]
+    then
+        error
+    else
+        $swns
+    fi
+}
 case $1 in
     -h|--help)
     usage
@@ -89,11 +92,14 @@ case $1 in
     -v|--version)
     display_version
     ;;
+    switch)
+    switchnamespace
+    ;;
     ls)
     list_namespaces
     ;;
     *)
-    echo "Unknown Command: $*"
+    echo "Unknown Command Argument: $*"
     usage
     ;;
 esac
