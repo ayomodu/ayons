@@ -79,14 +79,6 @@ checkx(){
     done
 }
 
-
-get_current(){
-    local ns
-    ns=$(kubectl get pods | cut -d " " -f 1 | cut -d $'\n' -f 2)
-    echo $ns
-}
-
-
 switchnamespace(){
     local VAR
     local namespace
@@ -132,8 +124,6 @@ case $1 in
     shift; switchnamespace $1 ;;
     create)
     shift; creatns $1 ;;
-    -c)
-    get_current ;;
     ls)
     shift; list_namespaces ;;
     *)
