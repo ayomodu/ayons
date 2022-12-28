@@ -36,8 +36,6 @@ error_msg="No Namespaces To List"
 
 ns=( $(kubectl get ns | cut -d " " -f 1 | cut -d $'\n' -f 2-) )
 
-# kubeoff="Unable to connect to the server: dial tcp [::1]:8080: connectex: No connection could be made because the target machine actively refused it."
-
 usage(){
     echo -e "$USAGE"
     exit 1
