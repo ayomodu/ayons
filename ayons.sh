@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -eou pipefail
+
 PROG="ayons"
 PROG_VERSION="0.0.1"
 
@@ -30,7 +32,7 @@ For more details see also:
 
 error_msg="No Namespaces To List"
 
-namespace=$(echo $2 | tr [:upper:] [:lower:])
+# namespace=$(echo $2 | tr [:upper:] [:lower:])
 
 ns=( $(kubectl get ns | cut -d " " -f 1 | cut -d $'\n' -f 2-) )
 
@@ -57,9 +59,12 @@ list_namespaces(){
 }
 
 error(){
+    local namespace
+    namespace="$1"
     echo "${namespace} namespace not found"
     exit 1
 }
+
 
 checkx(){
     for x in ${!ns[@]}
@@ -74,33 +79,67 @@ checkx(){
     done
 }
 
+
+get_current(){
+    local ns
+    ns=$(kubectl get pods | cut -d " " -f 1 | cut -d $'\n' -f 2)
+    echo $ns
+}
+
+
 switchnamespace(){
     local VAR
+    local namespace
+    namespace="$1"
     VAR=$(checkx)
     swns="kubectl config set-context --current --namespace=$namespace"
     if [ -z $VAR ]
     then
-        error
+        error $namespace
     else
         $swns
+        echo "Current Namespace $namespace"
     fi
 }
+
+
+creatns(){
+    local VAR
+    local namespace
+    namespace="$1"
+    VAR=$(checkx)
+    create_namespace="kubectl create ns $namespace"
+    if [ -z $VAR ]
+    then
+        $create_namespace
+    else
+        if [[ $VAR == $namespace ]]
+        then
+            echo "$namespace already exists!!!"
+        else
+            $create_namespace    
+        fi
+    fi
+}
+
+
 case $1 in
     -h|--help)
-    usage
-    ;;
+    usage ;;
     -v|--version)
-    display_version
-    ;;
+    display_version ;;
     switch)
-    switchnamespace
-    ;;
+    shift; switchnamespace $1 ;;
+    create)
+    shift; creatns $1 ;;
+    -c)
+    get_current ;;
     ls)
-    list_namespaces
-    ;;
+    shift; list_namespaces ;;
     *)
     echo "Unknown Command Argument: $*"
     usage
     ;;
 esac
+
 
