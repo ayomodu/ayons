@@ -31,10 +31,8 @@ For more details see also:
     https://www.github.com/ayomodu/ayons
 "
 
-
+RED='\033[0;31m'
 error_msg="No Namespaces To List"
-
-# namespace=$(echo $2 | tr [:upper:] [:lower:])
 
 ns=( $(kubectl get ns | cut -d " " -f 1 | cut -d $'\n' -f 2-) )
 
@@ -90,7 +88,7 @@ switchnamespace(){
         error $namespace
     else
         $swns
-        echo "Current Namespace $namespace"
+        echo -e "Current Namespace ${RED}$namespace"
     fi
 }
 
@@ -115,9 +113,11 @@ creatns(){
 }
 
 get_current(){
+    local RED
     local current_ns
+    RED='\033[0;31m'
     current_ns=$(kubectl config get-contexts | awk '/*/ {print $5}')
-    echo "Current Namespace: ${current_ns}"
+    echo -e "Current Namespace: ${RED}${current_ns}"
 }
 
 case $1 in
