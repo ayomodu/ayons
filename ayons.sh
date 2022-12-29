@@ -13,6 +13,7 @@ Usage:
   $PROG ls
   $PROG --help
   $PROG --version
+  $PROG --current
 
 
 Commands:
@@ -23,6 +24,7 @@ Commands:
 Options:
   -v, --version          Print the version of this tool.
   -h, --help             Print this help message.
+  -c, --current          View current namespace.
 
 
 For more details see also:
@@ -112,12 +114,20 @@ creatns(){
     fi
 }
 
+get_current(){
+    local current_ns
+    current_ns=$(kubectl config get-contexts | awk '/*/ {print $5}')
+    echo "Current Namespace: ${current_ns}"
+}
 
 case $1 in
     -h|--help)
     usage ;;
     -v|--version)
     display_version ;;
+    -c|--current)
+    get_current
+    ;;
     switch)
     shift; switchnamespace $1 ;;
     create)
